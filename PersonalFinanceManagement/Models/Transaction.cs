@@ -22,6 +22,5 @@ namespace PersonalFinanceManagement.API.Models
 
         public Kind Kind { get; set; }
 
-        public string Catcode { get; set; }
     }
 }

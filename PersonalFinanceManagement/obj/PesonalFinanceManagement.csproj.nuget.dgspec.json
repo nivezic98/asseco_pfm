@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement\\PesonalFinanceManagement.csproj": {}
+    "c:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement\\PesonalFinanceManagement.csproj": {
+    "c:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement\\PesonalFinanceManagement.csproj",
+        "projectUniqueName": "c:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj",
         "projectName": "PesonalFinanceManagement",
-        "projectPath": "C:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement\\PesonalFinanceManagement.csproj",
+        "projectPath": "c:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj",
         "packagesPath": "C:\\Users\\Instructor\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement\\obj\\",
+        "outputPath": "c:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Instructor\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -38,6 +38,14 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "AutoMapper": {
+              "target": "Package",
+              "version": "[11.0.1, )"
+            },
+            "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[11.0.0, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.2.3, )"

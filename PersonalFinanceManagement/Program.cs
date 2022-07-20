@@ -1,4 +1,6 @@
-namespace PesonalFinanceManagement.API;
+using PersonalFinanceManagement.API.Services;
+
+namespace PersonalFinanceManagement.API;
 
 public class Program
 {
@@ -7,6 +9,7 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
+        builder.Services.AddScoped<ITransactionService,TransactionService>();
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
