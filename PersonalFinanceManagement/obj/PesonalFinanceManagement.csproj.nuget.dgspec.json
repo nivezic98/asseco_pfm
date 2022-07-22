@@ -46,6 +46,10 @@
               "target": "Package",
               "version": "[11.0.0, )"
             },
+            "Npqsql.EntityFrameworkCode.PostgreSQL": {
+              "target": "Package",
+              "version": "[6.0.5, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.2.3, )"
