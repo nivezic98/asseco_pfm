@@ -5,6 +5,10 @@ namespace PersonalFinanceManagement.API.Database
         public TransactionDbContext()
         {
         
+
         }
+    
+    
     }
+
 }

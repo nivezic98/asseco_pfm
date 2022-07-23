@@ -27,7 +27,9 @@ namespace PersonalFinanceManagement.API.Controllers
         [Route("categories/import")]
         public void aha2(){}
 
-
+        [HttpPost]
+        [Route("categories/import")]
+        public void aha3(){}
 
         
     }
