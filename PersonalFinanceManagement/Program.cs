@@ -1,4 +1,4 @@
-using PersonalFinanceManagement.API.Database.Repository;
+using PersonalFinanceManagement.API.Database.Repositories;
 using PersonalFinanceManagement.API.Services;
 
 namespace PersonalFinanceManagement.API;

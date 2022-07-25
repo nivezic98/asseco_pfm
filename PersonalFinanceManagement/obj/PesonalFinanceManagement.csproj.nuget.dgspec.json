@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj": {}
+    "C:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj": {}
   },
   "projects": {
-    "c:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj": {
+    "C:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj",
+        "projectUniqueName": "C:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj",
         "projectName": "PesonalFinanceManagement",
-        "projectPath": "c:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj",
+        "projectPath": "C:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\PesonalFinanceManagement.csproj",
         "packagesPath": "C:\\Users\\Instructor\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\obj\\",
+        "outputPath": "C:\\Users\\Instructor\\Desktop\\PesonalFinanceManagement_Project\\PersonalFinanceManagement\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Instructor\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -46,7 +46,15 @@
               "target": "Package",
               "version": "[11.0.0, )"
             },
-            "Npqsql.EntityFrameworkCode.PostgreSQL": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[6.0.6, )"
+            },
+            "Microsoft.EntityFrameworkCore.Relational": {
+              "target": "Package",
+              "version": "[6.0.6, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[6.0.5, )"
             },
