@@ -21,6 +21,20 @@ namespace PersonalFinanceManagement.API.Services
             await _transactionRepository.CategorizeTransaction(id, categorize);
         }
 
+        public async Task<Transaction> CreateTransactions(CreateTransactionCommand command)
+        {
+            var entity = _mapper.Map<TransactionEntity>(command);
+
+            var existingProduct = await _transactionRepository.GetTransaction(command.Id);
+            if (existingProduct != null)
+            {
+                return null;
+            }
+            var result = await _transactionRepository.CreateTransaction(entity);
+
+            return _mapper.Map<Models.Transaction>(result);
+        }
+
         public async Task<SpendingList> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
         {
             return await _transactionRepository.GetAnalytics(start, end, direction, catCode);        
@@ -51,11 +65,6 @@ namespace PersonalFinanceManagement.API.Services
                 SortOrder = result.SortOrder,
                 Items = _mapper.Map<List<SplitTransactionList>>(result.Items)
         };
-        }
-
-        public async Task ImportTransactions(CreateTransactionList transactions)
-        {
-            await _transactionRepository.ImportTransactions(transactions);
         }
 
         public async Task SplitTransaction(string id, CreateSplitTransactionList splitTransaction)

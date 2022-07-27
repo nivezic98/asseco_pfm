@@ -6,7 +6,6 @@ using Npgsql;
 using PersonalFinanceManagement.API.Database;
 using PersonalFinanceManagement.API.Database.Repositories;
 using PersonalFinanceManagement.API.Services;
-using PersonalFinanceManagement.API.Formatters;
 
 namespace PersonalFinanceManagement.API;
 
@@ -29,12 +28,6 @@ public class Program
                  options.UseNpgsql(CreateConnectionString(builder.Configuration));
             });
 
-        builder.Services.AddMvc(options =>
-            {
-                options.InputFormatters.Insert(0, new TransactionInput());
-                options.InputFormatters.Insert(1, new CategoryInput());
-            });
-
         builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
@@ -54,6 +47,8 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+        
+        //app.UseRouting();
 
         app.UseAuthorization();
 

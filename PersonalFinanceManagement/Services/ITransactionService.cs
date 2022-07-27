@@ -8,9 +8,8 @@ namespace PersonalFinanceManagement.API.Services
     {
         Task<PagedSortedList<SplitTransactionList>> GetTransactions(TransactionKind kind, DateTime start, DateTime end, int page, int pageSize, string sortBy, SortOrder sortOrder);
 
+        Task<Transaction> CreateTransactions(CreateTransactionCommand command);
         Task<SplitTransactionList> GetTransaction(string id);
-
-        Task ImportTransactions(CreateTransactionList transactions);
 
         Task CategorizeTransaction(string id, CreateCategorizeCommand categorize);
 

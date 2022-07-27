@@ -46,6 +46,14 @@ namespace PersonalFinanceManagement.API.Database.Repositories
             return categorize;
         }
 
+        public async Task<TransactionEntity> CreateTransaction(TransactionEntity entity)
+        {
+            _context.Transaction.Add(entity);
+            await _context.SaveChangesAsync();
+
+            return entity;  
+        }
+
         public async Task<SpendingList> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
         {
             var queryCategories = _context.Category.Include(t => t.Transactions).AsQueryable();
@@ -111,10 +119,8 @@ namespace PersonalFinanceManagement.API.Database.Repositories
 
         public async Task<TransactionEntity> GetTransaction(string id)
         {
-            var transaction_query = _context.Transaction.Include(t => t.SplitTransaction).AsQueryable();
-            var transaction = await transaction_query.Where(t => t.Id == id).FirstOrDefaultAsync();
+            return await _context.Transaction.FirstOrDefaultAsync(x => x.Id == id);
 
-            return transaction;
         }
 
         public async Task<PagedSortedList<TransactionEntity>> GetTransactions(TransactionKind? kind, DateTime start, DateTime end, int? page, int? pageSize, string sortBy, SortOrder? sortOrder)
@@ -246,6 +252,7 @@ namespace PersonalFinanceManagement.API.Database.Repositories
 
             return splitTransaction;
         }
+
     }
 }
 

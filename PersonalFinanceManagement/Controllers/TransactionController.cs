@@ -3,6 +3,7 @@ using PersonalFinanceManagement.API.Models;
 using PersonalFinanceManagement.API.Services;
 using PersonalFinanceManagement.API.Database.Entities;
 using PersonalFinanceManagement.API.Commands;
+using System.Text;
 
 namespace PersonalFinanceManagement.API.Controllers
 {
@@ -26,8 +27,8 @@ namespace PersonalFinanceManagement.API.Controllers
         [HttpGet]
         [Route("transactions")]
         public async Task<IActionResult> GetTransactions(
-            [FromQuery] TransactionKind? kind, 
-            [FromQuery] DateTime start, 
+            [FromQuery] TransactionKind? kind,
+            [FromQuery] DateTime start,
             [FromQuery] DateTime end,
             [FromQuery] int? page,
             [FromQuery] int? pageSize,
@@ -44,16 +45,67 @@ namespace PersonalFinanceManagement.API.Controllers
 
         [HttpPost]
         [Route("transactions/import")]
-        public async Task<IActionResult> ImportTransactionsFromCSV([FromBody] CreateTransactionList transactions)
+        public async Task<IActionResult> ImportTransactionsFromCSV()
         {
-            if (!ModelState.IsValid)
+            StreamReader reader = new StreamReader("transactions.csv");
+            List<string> result = new List<string>();
+            int i = 0;
+            string line = "";
+            List<String> greske = new List<string>();
+            while ((line = await reader.ReadLineAsync()) != null)
             {
-                return BadRequest(ModelState);
+                i += 1;
+                result.Add(line);
             }
-            await _transactionService.ImportTransactions(transactions);
-            
-            return Ok();
-        }
+            var j = 0;
+            foreach (string elem in result)
+            {
+                j += 1;
+                if (j < 6)
+                {
+                    continue;
+                }
+                CreateTransactionCommand command = new CreateTransactionCommand();
+                string[] lista = elem.Split(",");
+                try
+                {
+                    command.Id = lista[0];
+                    command.BeneficiaryName = lista[1];
+                    command.Date = DateTime.Parse(lista[2]);
+                    command.Direction = Enum.Parse<Direction>(lista[3]);
+                    var k = 4;
+                    try
+                    {
+                        command.Amount = Double.Parse(lista[4]);
+                    }
+                    catch (Exception e)
+                    {
+                        k += 1;
+                        var n = lista[5].Length;
+                        StringBuilder sb = new StringBuilder();
+                        sb.Append(lista[4][1]);
+                        for (var iter = 0; iter < n - 1; iter++)
+                        {
+                            sb.Append(lista[5][iter]);
+                        }
+                        command.Amount = Double.Parse(sb.ToString());
+                    }
+                    k++;
+                    command.Description = lista[k];
+                    k++;
+                    command.Currency = lista[k];
+                    k++;
+                    command.Mcc = lista[k];
+                    k++;
+                    command.Kind = Enum.Parse<TransactionKind>(lista[k]);
+
+                    await _transactionService.CreateTransactions(command);
+                }
+                catch(Exception e){
+                    
+                }
+    }   return Ok(result);
+}
 
         [HttpPost]
         [Route("transaction/{id}/split")]
@@ -63,7 +115,7 @@ namespace PersonalFinanceManagement.API.Controllers
 
             return Ok();
         }
-        
+
         [HttpPost]
         [Route("transactions/{id}/categorize")]
         public async Task<IActionResult> CategorizeTransaction([FromRoute] string id, [FromBody] CreateCategorizeCommand categorize)

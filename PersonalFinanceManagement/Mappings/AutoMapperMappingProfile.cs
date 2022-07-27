@@ -18,7 +18,7 @@ namespace PersonalFinanceManagement.API.Mappings
 
             CreateMap<SplitTransactionEntity, SingleTransactionSplit>().ReverseMap();
             CreateMap<TransactionEntity, SplitTransactionList>().ReverseMap();
-        
+
         }
     }
 }
