@@ -60,3 +60,6 @@ C:\Users\Instructor\Desktop\PesonalFinanceManagement_Project\PersonalFinanceMana
 C:\Users\Instructor\Desktop\PesonalFinanceManagement_Project\PersonalFinanceManagement\bin\Debug\net6.0\Microsoft.Extensions.Caching.Memory.dll
 C:\Users\Instructor\Desktop\PesonalFinanceManagement_Project\PersonalFinanceManagement\bin\Debug\net6.0\Npgsql.dll
 C:\Users\Instructor\Desktop\PesonalFinanceManagement_Project\PersonalFinanceManagement\bin\Debug\net6.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\Instructor\Desktop\PesonalFinanceManagement_Project\PersonalFinanceManagement\bin\Debug\net6.0\CsvHelper.dll
+C:\Users\Instructor\Desktop\PesonalFinanceManagement_Project\PersonalFinanceManagement\bin\Debug\net6.0\Humanizer.dll
+C:\Users\Instructor\Desktop\PesonalFinanceManagement_Project\PersonalFinanceManagement\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Design.dll

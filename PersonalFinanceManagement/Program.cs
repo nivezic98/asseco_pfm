@@ -6,6 +6,7 @@ using Npgsql;
 using PersonalFinanceManagement.API.Database;
 using PersonalFinanceManagement.API.Database.Repositories;
 using PersonalFinanceManagement.API.Services;
+using PersonalFinanceManagement.API.Formatters;
 
 namespace PersonalFinanceManagement.API;
 
@@ -26,6 +27,12 @@ public class Program
         builder.Services.AddDbContext<TransactionDbContext>(options =>
             {
                  options.UseNpgsql(CreateConnectionString(builder.Configuration));
+            });
+
+        builder.Services.AddMvc(options =>
+            {
+                options.InputFormatters.Insert(0, new TransactionInput());
+                options.InputFormatters.Insert(1, new CategoryInput());
             });
 
         builder.Services.AddControllers().AddJsonOptions(options =>
@@ -56,7 +63,7 @@ public class Program
 
         app.Run();
     }
-
+    
     private static string CreateConnectionString(IConfiguration configuration)
         {
             var username = Environment.GetEnvironmentVariable("DATABASE_USERNAME") ?? configuration["Database:Username"];
@@ -85,5 +92,5 @@ public class Program
 
                 scope.ServiceProvider.GetRequiredService<TransactionDbContext>().Database.Migrate();
             }
-        }   
+        }  
 }
