@@ -6,12 +6,17 @@ namespace PersonalFinanceManagement.API.Services
 {
     public interface ITransactionService
     {
-        Task<PagedSortedList<Models.Transaction>> GetProducts(Kind kind, DateTime start, DateTime end, int page = 1, int pageSize = 10, string sortBy = null, SortOrder sortOrder = SortOrder.Asc);
-        Task<Models.Transaction> CreateTransaction(CreateTransactionCommand command);
-        Task<TransactionEntity> GetTransaction(string id);
-        Task<TransactionEntity> Update(TransactionEntity entity);
+        Task<PagedSortedList<SplitTransactionList>> GetTransactions(TransactionKind kind, DateTime start, DateTime end, int page, int pageSize, string sortBy, SortOrder sortOrder);
+
+        Task<SplitTransactionList> GetTransaction(string id);
+
+        Task ImportTransactions(CreateTransactionList transactions);
+
+        Task CategorizeTransaction(string id, CreateCategorizeCommand categorize);
+
+        Task SplitTransaction(string id, CreateSplitTransactionList splitTransaction);
+
+        Task<SpendingList> GetAnalytics( DateTime start, DateTime end, Direction direction, string? catCode);
+
     }
-
-
-
 }

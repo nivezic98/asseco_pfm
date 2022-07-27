@@ -22,7 +22,7 @@ namespace PersonalFinanceManagement.API.Commands
         public string Currency{get;set;}
         public string Mcc{get;set;}
         [Required]
-        public Kind? Kind{get;set;}
+        public TransactionKind? Kind{get;set;}
 
         public string CatCode{get;set;}
     }

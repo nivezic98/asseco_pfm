@@ -1,6 +1,6 @@
 namespace PersonalFinanceManagement.API.Database.Entities
 {
-    public enum Kind
+    public enum TransactionKind
     {
         dep,
         wdw,

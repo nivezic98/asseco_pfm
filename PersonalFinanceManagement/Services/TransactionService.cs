@@ -15,36 +15,52 @@ namespace PersonalFinanceManagement.API.Services
             _transactionRepository = transactionRepository;
             _mapper = mapper;
         }
-        public async Task<Transaction> CreateTransaction(CreateTransactionCommand command)
-        {
-            var entity = _mapper.Map<TransactionEntity>(command);
 
-            var existingProduct = await _transactionRepository.Get(command.Id);
-            if (existingProduct != null)
+        public async Task CategorizeTransaction(string id, CreateCategorizeCommand categorize)
+        {
+            await _transactionRepository.CategorizeTransaction(id, categorize);
+        }
+
+        public async Task<SpendingList> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
+        {
+            return await _transactionRepository.GetAnalytics(start, end, direction, catCode);        
+        }
+
+
+        public async Task<SplitTransactionList> GetTransaction(string id)
+        {
+            var result = await _transactionRepository.GetTransaction(id);
+
+            if (result == null)
             {
                 return null;
             }
-            var result = await _transactionRepository.Create(entity);
-
-            return _mapper.Map<Models.Transaction>(result);
+            return _mapper.Map<SplitTransactionList>(result);
         }
 
-        public async Task<PagedSortedList<Models.Transaction>> GetProducts(Kind kind,DateTime start, DateTime end, int page = 1, int pageSize = 10, string sortBy = null, SortOrder sortOrder = SortOrder.Asc)
+        public async Task<PagedSortedList<SplitTransactionList>> GetTransactions(TransactionKind kind, DateTime start, DateTime end, int page, int pageSize, string sortBy, SortOrder sortOrder)
         {
-           var result = await _transactionRepository.List(kind,start, end,page, pageSize, sortBy, sortOrder);
+             var result = await _transactionRepository.GetTransactions(kind, start, end, page, pageSize, sortBy, sortOrder);
 
-            return _mapper.Map<PagedSortedList<Models.Transaction>>(result);        }
-        public async Task<TransactionEntity> GetTransaction(string id)
-        {
-            var result =await _transactionRepository.Get(id);
-            return result;
+            return new PagedSortedList<SplitTransactionList>
+            {
+                PageSize = result.PageSize,
+                Page = result.Page,
+                TotalCount = result.TotalCount,
+                SortBy = result.SortBy,
+                SortOrder = result.SortOrder,
+                Items = _mapper.Map<List<SplitTransactionList>>(result.Items)
+        };
         }
 
-        public async Task<TransactionEntity> Update(TransactionEntity entity)
+        public async Task ImportTransactions(CreateTransactionList transactions)
         {
-            return await _transactionRepository.Update(entity);
+            await _transactionRepository.ImportTransactions(transactions);
         }
 
-        
+        public async Task SplitTransaction(string id, CreateSplitTransactionList splitTransaction)
+        {
+            await _transactionRepository.SplitTransaction(id, splitTransaction);
+        }
     }
 }

@@ -18,6 +18,7 @@ namespace PersonalFinanceManagement.API.Database
         }
         public DbSet<TransactionEntity> Transaction { get; set; }
         public DbSet<CategoryEntity> Category { get; set; }
+        public DbSet<SplitTransactionEntity> SplitTransaction { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

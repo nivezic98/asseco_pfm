@@ -20,7 +20,7 @@ namespace PersonalFinanceManagement.API.Models
 
         public string Mcc { get; set; }
 
-        public Kind Kind { get; set; }
+        public TransactionKind Kind { get; set; }
 
         public string CatCode { get; set; }
 
