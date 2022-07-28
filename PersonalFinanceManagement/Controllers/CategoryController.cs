@@ -3,6 +3,7 @@ using PersonalFinanceManagement.API.Models;
 using PersonalFinanceManagement.API.Services;
 using PersonalFinanceManagement.API.Database.Entities;
 using PersonalFinanceManagement.API.Commands;
+using CsvHelper;
 
 namespace PersonalFinanceManagement.API.Controllers
 {
@@ -25,46 +26,42 @@ namespace PersonalFinanceManagement.API.Controllers
 
         [HttpPost]
         [Route("categories/import")]
-        public async Task<IActionResult> ImportCategoriesFromCSV([FromBody] CreateCategoryList categories)
+        public async Task<IActionResult> ImportCategoriesFromCSV()
         {
-            StreamReader reader=  new StreamReader("categories.csv");
-        List<string> result= new List<string>();
-        int i=0;
-        string line="";
-        List<String> greske=new List<string>();
-        while ((line = await reader.ReadLineAsync()) != null)
-                {
-                    i+=1;
-                    result.Add(line);
+            StreamReader reader = new StreamReader("categories.csv");
+            List<string> lines = new List<string>();
+            string line = "";
+            while ((line = await reader.ReadLineAsync()) != null)
+            {
+                lines.Add(line);
+            }
+            int i = 0;
+            foreach (string item in lines)
+            {   
+                i += 1;
+                if(i<2){
+                    continue;
                 }
-        var j=0;   
-        foreach(string elem in result)
-        {
-            j+=1;
-            if(j<6)
-            {
-                continue;
-            }
-        
-            CreateCategoryCommand categoryCommand = new CreateCategoryCommand();
-            string[] lista=elem.Split(",");
-            if(lista.Length<3){continue;}
-            try{
-            categoryCommand.Code=lista[0];
-            categoryCommand.Name=lista[2];
-            categoryCommand.ParentCode=lista[1];
-            var cat = await _categoryService.CreateCategory(categoryCommand);
-            }
-            
-            catch(Exception e)
-            {
+                CreateCategoryCommand categoryCommand = new CreateCategoryCommand();
+                string[] elem = item.Split(",");
+                if (elem.Length < 3) { continue; }
+                try
+                {
+                    categoryCommand.Code = elem[0];
+                    categoryCommand.ParentCode = elem[1];
+                    categoryCommand.Name = elem[2];
+                    await _categoryService.CreateCategory(categoryCommand);
+                }
 
+                catch (Exception e)
+                {
+                    return BadRequest();
+                }
             }
+            return Ok();
+
         }
-        return Ok(result);
-            
-        }
-        
+
         [HttpGet]
         [Route("categories")]
         public async Task<ActionResult<CategoryList>> GetCategories([FromQuery] string? parentId)

@@ -1,4 +1,5 @@
 using AutoMapper;
+using PersonalFinanceManagement.API.Commands;
 using PersonalFinanceManagement.API.Database.Entities;
 using PersonalFinanceManagement.API.Models;
 
@@ -8,13 +9,13 @@ namespace PersonalFinanceManagement.API.Mappings
     {
         public AutoMapperProfile()
         {   
-            CreateMap<Transaction,TransactionEntity>().ReverseMap();
-            CreateMap<Category,CategoryEntity>().ReverseMap();
+            CreateMap<TransactionEntity,Transaction>().ForMember(d => d.Id, opts => opts.MapFrom(s => s.Id));
+            CreateMap<CategoryEntity,Category>().ForMember(d => d.Code, opts => opts.MapFrom(s => s.Code));
 
-            CreateMap<CreateTransactionList,TransactionEntity>().ReverseMap();
-            CreateMap<CreateCategoryList,CategoryEntity>().ReverseMap();
+            CreateMap<CreateTransactionCommand,TransactionEntity>().ForMember(d => d.Id, opts => opts.MapFrom(s => s.Id));
+            CreateMap<CreateCategoryCommand,CategoryEntity>().ForMember(d => d.Code, opts => opts.MapFrom(s => s.Code));
 
-            CreateMap<PagedSortedList<TransactionEntity>, PagedSortedList<Transaction>>().ReverseMap();
+            CreateMap<PagedSortedList<TransactionEntity>, PagedSortedList<Transaction>>();
 
             CreateMap<SplitTransactionEntity, SingleTransactionSplit>().ReverseMap();
             CreateMap<TransactionEntity, SplitTransactionList>().ReverseMap();

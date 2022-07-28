@@ -48,64 +48,63 @@ namespace PersonalFinanceManagement.API.Controllers
         public async Task<IActionResult> ImportTransactionsFromCSV()
         {
             StreamReader reader = new StreamReader("transactions.csv");
-            List<string> result = new List<string>();
-            int i = 0;
+            List<string> lines = new List<string>();
             string line = "";
-            List<String> greske = new List<string>();
             while ((line = await reader.ReadLineAsync()) != null)
             {
-                i += 1;
-                result.Add(line);
+                lines.Add(line);
             }
-            var j = 0;
-            foreach (string elem in result)
+            int i = 0;
+            foreach (string item in lines)
             {
-                j += 1;
-                if (j < 6)
+                i += 1;
+                if (i < 2)
                 {
                     continue;
                 }
                 CreateTransactionCommand command = new CreateTransactionCommand();
-                string[] lista = elem.Split(",");
+                string[] elem = item.Split(",");
                 try
                 {
-                    command.Id = lista[0];
-                    command.BeneficiaryName = lista[1];
-                    command.Date = DateTime.Parse(lista[2]);
-                    command.Direction = Enum.Parse<Direction>(lista[3]);
-                    var k = 4;
+                    command.Id = elem[0];
+                    command.BeneficiaryName = elem[1];
+                    command.Date = DateTime.Parse(elem[2]);
+                    command.Direction = Enum.Parse<Direction>(elem[3]);
+                    int j = 4;
                     try
                     {
-                        command.Amount = Double.Parse(lista[4]);
+                        command.Amount = Double.Parse(elem[4]);
                     }
                     catch (Exception e)
                     {
-                        k += 1;
-                        var n = lista[5].Length;
+                        j += 1;
+                        int len = elem[5].Length;
                         StringBuilder sb = new StringBuilder();
-                        sb.Append(lista[4][1]);
-                        for (var iter = 0; iter < n - 1; iter++)
+                        sb.Append(elem[4][1]);
+                        for (var k = 0; k < len - 1; k++)
                         {
-                            sb.Append(lista[5][iter]);
+                            sb.Append(elem[5][k]);
                         }
                         command.Amount = Double.Parse(sb.ToString());
                     }
-                    k++;
-                    command.Description = lista[k];
-                    k++;
-                    command.Currency = lista[k];
-                    k++;
-                    command.Mcc = lista[k];
-                    k++;
-                    command.Kind = Enum.Parse<TransactionKind>(lista[k]);
-
+                    j++;
+                    command.Description = elem[j];
+                    j++;
+                    command.Currency = elem[j];
+                    j++;
+                    command.Mcc = elem[j];
+                    j++;
+                    command.Kind = Enum.Parse<TransactionKind>(elem[j]);
                     await _transactionService.CreateTransactions(command);
                 }
-                catch(Exception e){
-                    
+                catch (Exception e)
+                {
+                    return BadRequest();
                 }
-    }   return Ok(result);
-}
+
+            }
+            return Ok();
+        }
 
         [HttpPost]
         [Route("transaction/{id}/split")]
