@@ -14,11 +14,11 @@ namespace PersonalFinanceManagement.API.Services
 
         Task<TransactionEntity> UpdateEntity(TransactionEntity entity);
 
-        Task<CreateCategorizeCommand> CategorizeTransaction(string id, CreateCategorizeCommand categorize);
+        Task<CreateCategorizeCommand> CategorizeTransaction(string id);
 
         Task<CreateSplitCommand> SplitTransaction(SplitTransactionEntity entity);
 
-        Task<SpendingInCategory> GetAnalytics( DateTime start, DateTime end, Direction direction, string? catCode);
+        Task<SpendingList> GetAnalytics( DateTime start, DateTime end, Direction direction, string? catCode);
 
         Task RemoveSplit(string id);
     }

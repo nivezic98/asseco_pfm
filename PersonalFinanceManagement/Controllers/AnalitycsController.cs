@@ -30,11 +30,11 @@ namespace PersonalFinanceManagement.API.Controllers
             [FromQuery] DateTime end,
             [FromQuery] Direction direction
         )
-        {   
-            SpendingList list = new SpendingList();
+        {           
+    
             var result = await _transactionService.GetAnalytics(start, end, direction, catCode);
-            list.Group.Add(result);
-            return Ok(list);
+                
+            return Ok(result);
         }
 
     }

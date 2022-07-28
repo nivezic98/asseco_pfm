@@ -17,33 +17,20 @@ namespace PersonalFinanceManagement.API.Database.Repositories
             _mapper = mapper;
         }
 
-        public async Task<CreateCategorizeCommand> CategorizeTransaction(string id, CreateCategorizeCommand categorize)
-        {
-            var category = await _context.Category.FindAsync(categorize.Catcode);
-            if (category == null)
-            {
-                return null;
-            }
-
-            var transaction = await _context.Transaction.FindAsync(id);
-            if (transaction == null)
-            {
-                return null;
-            }
-
-            if (transaction.Catcode == "Z")
-            {
-                var splitsDeleted = await _context.SplitTransaction.Where(s => s.Id == id).ToListAsync();
-                _context.SplitTransaction.RemoveRange(splitsDeleted);
+        public async Task<CreateCategorizeCommand> CategorizeTransaction(string id)
+        {   
+            CreateCategorizeCommand result = new CreateCategorizeCommand();
+            var entity = await GetTransaction(id);
+            var code = entity.Catcode;
+            result.Catcode = code;
+            if(code == null){
+                entity.Catcode = "string";
+                _context.Entry(entity).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+                result.Catcode = "string";
             }
-
-            transaction.Catcode = category.Code;
-
-            _context.Entry(transaction).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return categorize;
+            
+            return result;
         }
 
         public async Task<TransactionEntity> CreateTransaction(TransactionEntity entity)
@@ -54,21 +41,59 @@ namespace PersonalFinanceManagement.API.Database.Repositories
             return entity;
         }
 
-        public async Task<SpendingInCategory> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
-        {
-            var query = _context.Transaction.Where(p => p.Catcode == catCode && start <= p.Date && p.Date <= end && p.Direction == direction).AsQueryable();
-            int total = query.Count();
-            var items = await query.ToListAsync();
-            double amount = 0;
-            foreach (var elem in items)
+        public async Task<SpendingList> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
+        {   
+            var queryCategories = _context.Category.Where(x => x.Code == catCode);
+
+            var categories = await queryCategories.ToListAsync();
+
+            var spendingByCategory = new SpendingList();
+
+            foreach (var category in categories)
             {
-                amount += elem.Amount;
+                //Za svaku kategoriju dohvatam i one kategorije cija je ova kategorija roditelj
+                var categoryList = await _context.Category
+                    .Where(c => c.ParentCode == category.Code || c.Code == category.Code)
+                    .ToListAsync();
+
+                var amount = 0.0;
+                var count = 0;
+
+                foreach(var cat in categoryList)
+                {
+                    var nonSplittedTransactions = cat.Transactions.Where(t => t.Direction == direction);
+                    var splittedTransactions = cat.SplitTransactions.Where(st => st.Transaction.Direction == direction);
+
+                    if (!(start == DateTime.MinValue))
+                    {
+                        nonSplittedTransactions = nonSplittedTransactions.Where(t => t.Date >= start);
+                        splittedTransactions = splittedTransactions.Where(st => st.Transaction.Date >= start);
+                    }
+                    if (!(end == DateTime.MinValue))
+                    {
+                        nonSplittedTransactions = nonSplittedTransactions.Where(t => t.Date <= end);
+                        splittedTransactions = splittedTransactions.Where(st => st.Transaction.Date <= end);
+                    }
+
+                    amount += nonSplittedTransactions.Select(t => t.Amount).Sum() + splittedTransactions.Select(t => t.Amount).Sum();
+                    count += nonSplittedTransactions.Count() + splittedTransactions.Count();
+                }
+               
+                if (count == 0)
+                {
+                    continue;
+                }
+
+                spendingByCategory.Group.Add(
+                    new SpendingInCategory
+                    {
+                        Catcode = category.Code,
+                        Amount = amount,
+                        Count = count
+                    }
+                );
             }
-            SpendingInCategory result = new SpendingInCategory();
-            result.Catcode = catCode;
-            result.Amount = amount;
-            result.Count = total;
-            return result;
+            return spendingByCategory;
         }
 
         public async Task<TransactionEntity> GetTransaction(string id)

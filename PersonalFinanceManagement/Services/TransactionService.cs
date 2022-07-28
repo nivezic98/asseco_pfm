@@ -16,9 +16,9 @@ namespace PersonalFinanceManagement.API.Services
             _mapper = mapper;
         }
 
-        public async Task<CreateCategorizeCommand> CategorizeTransaction(string id, CreateCategorizeCommand categorize)
+        public async Task<CreateCategorizeCommand> CategorizeTransaction(string id)
         {
-            var res = await _transactionRepository.CategorizeTransaction(id, categorize);
+            var res = await _transactionRepository.CategorizeTransaction(id);
             return res;
         }
 
@@ -36,7 +36,7 @@ namespace PersonalFinanceManagement.API.Services
             return _mapper.Map<Models.Transaction>(result);
         }
 
-        public async Task<SpendingInCategory> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
+        public async Task<SpendingList> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
         {
             return await _transactionRepository.GetAnalytics(start, end, direction, catCode);        
         }

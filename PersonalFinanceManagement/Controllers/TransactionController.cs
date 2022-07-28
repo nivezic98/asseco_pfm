@@ -148,9 +148,9 @@ namespace PersonalFinanceManagement.API.Controllers
 
         [HttpPost]
         [Route("transactions/{id}/categorize")]
-        public async Task<IActionResult> CategorizeTransaction([FromRoute] string id, [FromBody] CreateCategorizeCommand categorize)
+        public async Task<IActionResult> CategorizeTransaction([FromRoute] string id)
         {
-            var res = await _transactionService.CategorizeTransaction(id, categorize);
+            var res = await _transactionService.CategorizeTransaction(id);
 
             if(res == null){
                 return BadRequest();
