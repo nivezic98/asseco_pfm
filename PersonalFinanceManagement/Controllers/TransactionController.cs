@@ -108,21 +108,62 @@ namespace PersonalFinanceManagement.API.Controllers
 
         [HttpPost]
         [Route("transaction/{id}/split")]
-        public async Task<IActionResult> SplitTransaction([FromRoute] string id, [FromBody] CreateSplitTransactionList splitTransactionList)
-        {
-            await _transactionService.SplitTransaction(id, splitTransactionList);
-
-            return Ok();
+        public async Task<IActionResult> SplitTransaction([FromRoute] string id, [FromBody] CreateSplitTransactionList splitTransaction)
+        {   
+            CreateSplitCommand result = new CreateSplitCommand();
+            CreateSplitTransactionList list = new CreateSplitTransactionList();
+            var transaction_entity = await _transactionService.GetTransaction(id);
+            if (transaction_entity == null)
+            {
+                return BadRequest("Transaction with given id doesn't exist.");
+            }
+            double total = 0;
+            await _transactionService.RemoveSplit(id);
+            foreach (var elem in splitTransaction.Splits)
+            {
+                total += elem.Amount;
+                SplitTransactionEntity entity = new SplitTransactionEntity();
+                entity.Id = id;
+                entity.Catcode = elem.Catcode;
+                entity.Amount = elem.Amount;
+                transaction_entity.Catcode = elem.Catcode;
+                await _transactionService.UpdateEntity(transaction_entity);
+                try
+                {
+                    result = await _transactionService.SplitTransaction(entity);
+                    list.Splits.Add(result);
+                }
+                catch (Microsoft.EntityFrameworkCore.DbUpdateException e)
+                {
+                    return BadRequest("There is no such category.");
+                }
+            }
+            if (total > transaction_entity.Amount)
+            {
+                return BadRequest("Bussines problem.");
+            }
+            
+            return Ok(list);
         }
 
         [HttpPost]
         [Route("transactions/{id}/categorize")]
         public async Task<IActionResult> CategorizeTransaction([FromRoute] string id, [FromBody] CreateCategorizeCommand categorize)
         {
-            await _transactionService.CategorizeTransaction(id, categorize);
+            var res = await _transactionService.CategorizeTransaction(id, categorize);
 
-            return Ok();
+            if(res == null){
+                return BadRequest();
+            }
+
+            return Ok(res);
         }
+        [HttpPost("auto-categorize")] 
+        public async Task<IActionResult> AutoCategorize()
+    {
+         await _transactionService.AutoCategorize();
+         return Ok();
+    }
 
     }
 }

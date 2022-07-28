@@ -17,8 +17,8 @@ namespace PersonalFinanceManagement.API.Mappings
 
             CreateMap<PagedSortedList<TransactionEntity>, PagedSortedList<Transaction>>();
 
-            CreateMap<SplitTransactionEntity, SingleTransactionSplit>().ReverseMap();
-            CreateMap<TransactionEntity, SplitTransactionList>().ReverseMap();
+            CreateMap<CreateSplitCommand,SplitTransactionEntity>().ForMember(d => d.Catcode, opts => opts.MapFrom(s => s.Catcode));
+            //CreateMap<SplitTransactionEntity, SingleTransactionSplit>().ForMember(d => d.CatCode, opts => opts.MapFrom(s => s.Catcode));
 
         }
     }

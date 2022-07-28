@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace PersonalFinanceManagement.API.Database.Entities
 {
     public class TransactionEntity
@@ -23,7 +25,6 @@ namespace PersonalFinanceManagement.API.Database.Entities
         public string Catcode { get; set; }
 
         public CategoryEntity Category { get; set; }
-
         public ICollection<SplitTransactionEntity> SplitTransaction { get; set; }
     }
 }

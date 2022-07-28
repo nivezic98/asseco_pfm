@@ -1,0 +1,8 @@
+rule-1:
+  title: When beneficiary name contains "chevron" or "shell" categorize transaction as 4 (Auto & Transport / Gas & Fuel)
+  catcode: 4
+  predicate: BeneficiaryName LIKE '%chevron%' OR BeneficiaryName LIKE '%shell%'
+rule-2:
+  title: When mcc is 5811 (Caterers) categorize transaction as 39 (Food & Dining / Restaurants)
+  catcode: 39
+  predicate: Mcc = 5811

@@ -51,70 +51,24 @@ namespace PersonalFinanceManagement.API.Database.Repositories
             _context.Transaction.Add(entity);
             await _context.SaveChangesAsync();
 
-            return entity;  
+            return entity;
         }
 
-        public async Task<SpendingList> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
+        public async Task<SpendingInCategory> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
         {
-            var queryCategories = _context.Category.Include(t => t.Transactions).AsQueryable();
-
-            if (catCode != null)
+            var query = _context.Transaction.Where(p => p.Catcode == catCode && start <= p.Date && p.Date <= end && p.Direction == direction).AsQueryable();
+            int total = query.Count();
+            var items = await query.ToListAsync();
+            double amount = 0;
+            foreach (var elem in items)
             {
-                queryCategories = queryCategories.Where(x => x.Code == catCode);
+                amount += elem.Amount;
             }
-
-            var categories = await queryCategories.ToListAsync();
-
-            var spendingByCategory = new SpendingList();
-
-            foreach (var category in categories)
-            {
-    
-                var categoryList = await _context.Category
-                    .Where(c => c.Code == category.Code || c.ParentCode == category.Code)
-                    .Include(c => c.Transactions)
-                    .Include(c => c.SplitTransactions)
-                    .ThenInclude(st => st.Transaction)
-                    .ToListAsync();
-
-                var amount = 0.0;
-                var count = 0;
-
-                foreach (var cat in categoryList)
-                {
-                    var nonSplitTransactions = cat.Transactions.Where(t => t.Direction == direction && t.Catcode != "Z");
-                    var splitTransactions = cat.SplitTransactions.Where(st => st.Transaction.Direction == direction);
-
-                    if (!(start == DateTime.MinValue))
-                    {
-                        nonSplitTransactions = nonSplitTransactions.Where(t => t.Date >= start);
-                        splitTransactions = splitTransactions.Where(s => s.Transaction.Date >= start);
-                    }
-                    if (!(end == DateTime.MinValue))
-                    {
-                        nonSplitTransactions = nonSplitTransactions.Where(t => t.Date <= end);
-                        splitTransactions = splitTransactions.Where(s => s.Transaction.Date <= end);
-                    }
-
-                    amount += nonSplitTransactions.Select(x => x.Amount).Sum() + splitTransactions.Select(x => x.Amount).Sum();
-                    count += nonSplitTransactions.Count() + splitTransactions.Count();
-                }
-
-                if (count == 0)
-                {
-                    continue;
-                }
-
-                spendingByCategory.Group.Add(
-                    new SpendingInCategory
-                    {
-                        Catcode = category.Code,
-                        Amount = amount,
-                        Count = count
-                    }
-                );
-            }
-            return spendingByCategory;
+            SpendingInCategory result = new SpendingInCategory();
+            result.Catcode = catCode;
+            result.Amount = amount;
+            result.Count = total;
+            return result;
         }
 
         public async Task<TransactionEntity> GetTransaction(string id)
@@ -198,61 +152,48 @@ namespace PersonalFinanceManagement.API.Database.Repositories
             };
         }
 
-        
-
-        public async Task ImportTransactions(CreateTransactionList transactions)
+        public async Task<CreateSplitCommand> SplitTransaction(SplitTransactionEntity entity)
         {
-            await _context.Transaction.AddRangeAsync(_mapper.Map<IEnumerable<TransactionEntity>>(transactions.Transactions));
+
+            _context.SplitTransaction.Add(entity);
+            await _context.SaveChangesAsync();
+            CreateSplitCommand command = new CreateSplitCommand();
+            command.Amount = entity.Amount;
+            command.Catcode = entity.Catcode;
+            return command;
+        }
+        public async Task<TransactionEntity> UpdateEntity(TransactionEntity entity)
+        {
+            _context.Update(entity);
+            await _context.SaveChangesAsync();
+            return entity;
+        }
+        public async Task RemoveSplit(string id)
+        {
+            var items = _context.SplitTransaction.Where(x => x.Id == id).AsQueryable().ToList();
+            foreach (var item in items)
+            {
+                _context.SplitTransaction.Remove(item);
+            }
             await _context.SaveChangesAsync();
         }
 
-        public async Task<CreateSplitTransactionList> SplitTransaction(string id, CreateSplitTransactionList splitTransaction)
+        public async Task AutoCategorize()
         {
-            var queryTransactions = _context.Transaction.Include(t => t.SplitTransaction).AsQueryable();
-
-            var transaction = queryTransactions.Where(t => t.Id == id).FirstOrDefault();
-
-            if (transaction == null)
+            string[] lines = System.IO.File.ReadAllLines("rules.txt");
+            
+            int n=Convert.ToInt32(lines.Length/4);
+            for(int i=0;i<n;i++)
             {
-                return null;
+             string code=lines[i*4+2].Split(":")[1];
+             string query=lines[i*4+3].Split(":")[1];   
+             var result=_context.Database.ExecuteSqlRaw("UPDATE public.transactions \r\n"+ "SET Catcode="+code+"\r\n WHERE "+query+" AND Catcode is null"+";");
+             await _context.SaveChangesAsync();
             }
-
-            if (splitTransaction.Splits.Select(x => (int)x.Amount).Sum() != (int)transaction.Amount)
-            {
-                return null;
-            }
-
-            var hasSplits = transaction.SplitTransaction.Count() > 0;
-
-            if (hasSplits)
-            {
-                var splitsDeleted = await _context.SplitTransaction.Where(st => st.Id == id).ToListAsync();
-                _context.SplitTransaction.RemoveRange(splitsDeleted);
-                await _context.SaveChangesAsync();
-            }
-
-
-            transaction.Catcode = "Z";
-            _context.Entry(transaction).State = EntityState.Modified;
-
-
-            foreach (var spTransaction in splitTransaction.Splits)
-            {
-                await _context.AddAsync(new SplitTransactionEntity
-                {
-                    Id = id,
-                    Catcode = spTransaction.Catcode,
-                    Amount = spTransaction.Amount
-                });
-            }
-
-            await _context.SaveChangesAsync();
-
-
-
-            return splitTransaction;
         }
-
     }
+
+
 }
+
 
