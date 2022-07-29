@@ -26,9 +26,9 @@ namespace PersonalFinanceManagement.API.Controllers
 
         [HttpPost]
         [Route("categories/import")]
-        public async Task<IActionResult> ImportCategoriesFromCSV()
+        public async Task<IActionResult> ImportCategoriesFromCSV([FromBody] string file)
         {
-            StreamReader reader = new StreamReader("categories.csv");
+            StreamReader reader = new StreamReader(file);
             List<string> lines = new List<string>();
             string line = "";
             while ((line = await reader.ReadLineAsync()) != null)

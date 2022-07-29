@@ -17,19 +17,20 @@ namespace PersonalFinanceManagement.API.Database.Repositories
             _mapper = mapper;
         }
 
-        public async Task<CreateCategorizeCommand> CategorizeTransaction(string id)
-        {   
+        public async Task<CreateCategorizeCommand> CategorizeTransaction(string id, CreateCategorizeCommand command)
+        {
             CreateCategorizeCommand result = new CreateCategorizeCommand();
             var entity = await GetTransaction(id);
             var code = entity.Catcode;
             result.Catcode = code;
-            if(code == null){
-                entity.Catcode = "string";
+            if (code == null)
+            {
+                entity.Catcode = command.Catcode;
                 _context.Entry(entity).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-                result.Catcode = "string";
+                result.Catcode = command.Catcode;
             }
-            
+
             return result;
         }
 
@@ -42,58 +43,40 @@ namespace PersonalFinanceManagement.API.Database.Repositories
         }
 
         public async Task<SpendingList> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
-        {   
-            var queryCategories = _context.Category.Where(x => x.Code == catCode);
+        {
+            SpendingList spendings = new SpendingList();
 
-            var categories = await queryCategories.ToListAsync();
+            var category_query = _context.Category.Where(x => x.Code == catCode).AsQueryable();
+            var categories = await category_query.ToListAsync();
+            var transactions_query = _context.Transaction.Where(x => x.Date >= start && x.Date <= end && x.Direction == direction && x.Catcode == catCode).AsQueryable();
+            var transactions = await transactions_query.ToListAsync();
+            
+            
+        
+            var data = transactions.Join(categories, x => x.Id, y => y.Code, (x,y) => new { x, y}).ToList();
+            int count = 0;
+            double amount = 0.0;
 
-            var spendingByCategory = new SpendingList();
-
-            foreach (var category in categories)
+            foreach(var item in data)
             {
-                //Za svaku kategoriju dohvatam i one kategorije cija je ova kategorija roditelj
-                var categoryList = await _context.Category
-                    .Where(c => c.ParentCode == category.Code || c.Code == category.Code)
-                    .ToListAsync();
-
-                var amount = 0.0;
-                var count = 0;
-
-                foreach(var cat in categoryList)
+                for(int i = 0; i < data.Count; i++)
                 {
-                    var nonSplittedTransactions = cat.Transactions.Where(t => t.Direction == direction);
-                    var splittedTransactions = cat.SplitTransactions.Where(st => st.Transaction.Direction == direction);
-
-                    if (!(start == DateTime.MinValue))
+                    if(data[i].y.ParentCode == item.y.ParentCode)
                     {
-                        nonSplittedTransactions = nonSplittedTransactions.Where(t => t.Date >= start);
-                        splittedTransactions = splittedTransactions.Where(st => st.Transaction.Date >= start);
+                        count++;
+                        amount += data[i].x.Amount;
                     }
-                    if (!(end == DateTime.MinValue))
-                    {
-                        nonSplittedTransactions = nonSplittedTransactions.Where(t => t.Date <= end);
-                        splittedTransactions = splittedTransactions.Where(st => st.Transaction.Date <= end);
-                    }
-
-                    amount += nonSplittedTransactions.Select(t => t.Amount).Sum() + splittedTransactions.Select(t => t.Amount).Sum();
-                    count += nonSplittedTransactions.Count() + splittedTransactions.Count();
                 }
-               
-                if (count == 0)
+                var spending = new SpendingInCategory
                 {
-                    continue;
-                }
-
-                spendingByCategory.Group.Add(
-                    new SpendingInCategory
-                    {
-                        Catcode = category.Code,
-                        Amount = amount,
-                        Count = count
-                    }
-                );
+                    Catcode = item.y.ParentCode,
+                    Amount = amount,
+                    Count = count
+                };
+                spendings.Group.Add(spending);
             }
-            return spendingByCategory;
+
+            return spendings;
         }
 
         public async Task<TransactionEntity> GetTransaction(string id)
@@ -177,15 +160,19 @@ namespace PersonalFinanceManagement.API.Database.Repositories
             };
         }
 
-        public async Task<CreateSplitCommand> SplitTransaction(SplitTransactionEntity entity)
+        public async Task<SplitTransactionEntity> SplitTransaction(String id, CreateSplitTransactionList splitTransaction)
         {
-
-            _context.SplitTransaction.Add(entity);
-            await _context.SaveChangesAsync();
-            CreateSplitCommand command = new CreateSplitCommand();
-            command.Amount = entity.Amount;
-            command.Catcode = entity.Catcode;
-            return command;
+            
+            SplitTransactionEntity split = new SplitTransactionEntity();
+            foreach(var item in splitTransaction.Splits){
+                split.Id = id;
+                split.Catcode = item.Catcode;
+                split.Amount = item.Amount;
+                await _context.SplitTransaction.AddAsync(split);
+                await _context.SaveChangesAsync();
+            }
+            
+            return split;             
         }
         public async Task<TransactionEntity> UpdateEntity(TransactionEntity entity)
         {
@@ -205,15 +192,15 @@ namespace PersonalFinanceManagement.API.Database.Repositories
 
         public async Task AutoCategorize()
         {
-            string[] lines = System.IO.File.ReadAllLines("rules.txt");
-            
-            int n=Convert.ToInt32(lines.Length/4);
-            for(int i=0;i<n;i++)
+            string[] allLines = System.IO.File.ReadAllLines("rules.txt");
+
+            int n = Convert.ToInt32(allLines.Length / 4);
+            for (int i = 0; i < n; i++)
             {
-             string code=lines[i*4+2].Split(":")[1];
-             string query=lines[i*4+3].Split(":")[1];   
-             var result=_context.Database.ExecuteSqlRaw("UPDATE public.transactions \r\n"+ "SET Catcode="+code+"\r\n WHERE "+query+" AND Catcode is null"+";");
-             await _context.SaveChangesAsync();
+                string catCode = allLines[i * 4 + 2].Split(":")[1];
+                string query = allLines[i * 4 + 3].Split(":")[1];
+                var result = _context.Database.ExecuteSqlRaw("UPDATE public.transactions " + "SET Catcode=" + catCode + " WHERE " + query + " AND Catcode is null" + ";");
+                await _context.SaveChangesAsync();
             }
         }
     }

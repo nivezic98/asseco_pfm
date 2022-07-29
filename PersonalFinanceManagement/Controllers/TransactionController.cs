@@ -45,9 +45,9 @@ namespace PersonalFinanceManagement.API.Controllers
 
         [HttpPost]
         [Route("transactions/import")]
-        public async Task<IActionResult> ImportTransactionsFromCSV()
+        public async Task<IActionResult> ImportTransactionsFromCSV([FromBody] string file)
         {
-            StreamReader reader = new StreamReader("transactions.csv");
+            StreamReader reader = new StreamReader(file);
             List<string> lines = new List<string>();
             string line = "";
             while ((line = await reader.ReadLineAsync()) != null)
@@ -110,50 +110,37 @@ namespace PersonalFinanceManagement.API.Controllers
         [Route("transaction/{id}/split")]
         public async Task<IActionResult> SplitTransaction([FromRoute] string id, [FromBody] CreateSplitTransactionList splitTransaction)
         {   
-            CreateSplitCommand result = new CreateSplitCommand();
-            CreateSplitTransactionList list = new CreateSplitTransactionList();
-            var transaction_entity = await _transactionService.GetTransaction(id);
-            if (transaction_entity == null)
+            var transaction = await _transactionService.GetTransaction(id);
+            if (transaction == null)
             {
-                return BadRequest("Transaction with given id doesn't exist.");
+                return BadRequest("No transaction with given id!");
             }
-            double total = 0;
-            await _transactionService.RemoveSplit(id);
-            foreach (var elem in splitTransaction.Splits)
-            {
-                total += elem.Amount;
-                SplitTransactionEntity entity = new SplitTransactionEntity();
-                entity.Id = id;
-                entity.Catcode = elem.Catcode;
-                entity.Amount = elem.Amount;
-                transaction_entity.Catcode = elem.Catcode;
-                await _transactionService.UpdateEntity(transaction_entity);
-                try
-                {
-                    result = await _transactionService.SplitTransaction(entity);
-                    list.Splits.Add(result);
-                }
-                catch (Microsoft.EntityFrameworkCore.DbUpdateException e)
-                {
-                    return BadRequest("There is no such category.");
-                }
+
+            var totalAmount = 0.0;
+            foreach(var item in splitTransaction.Splits){
+                totalAmount += item.Amount;
             }
-            if (total > transaction_entity.Amount)
-            {
-                return BadRequest("Bussines problem.");
+            if(totalAmount > transaction.Amount){
+                return BadRequest("Split amout is over transaction amount!");
             }
             
-            return Ok(list);
+            var result = await _transactionService.SplitTransaction(id,splitTransaction);
+            return Ok();
+            
         }
 
         [HttpPost]
         [Route("transactions/{id}/categorize")]
-        public async Task<IActionResult> CategorizeTransaction([FromRoute] string id)
+        public async Task<IActionResult> CategorizeTransaction([FromRoute] string id, [FromBody] CreateCategorizeCommand command)
         {
-            var res = await _transactionService.CategorizeTransaction(id);
+            var transaction = await _transactionService.GetTransaction(id);
+            if(transaction == null){
+                return BadRequest("No transaction with given id!");
+            }
+            var res = await _transactionService.CategorizeTransaction(id,command);
 
             if(res == null){
-                return BadRequest();
+                return BadRequest("No category with given catcode!");
             }
 
             return Ok(res);

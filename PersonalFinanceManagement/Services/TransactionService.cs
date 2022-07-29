@@ -16,9 +16,9 @@ namespace PersonalFinanceManagement.API.Services
             _mapper = mapper;
         }
 
-        public async Task<CreateCategorizeCommand> CategorizeTransaction(string id)
+        public async Task<CreateCategorizeCommand> CategorizeTransaction(string id, CreateCategorizeCommand command)
         {
-            var res = await _transactionRepository.CategorizeTransaction(id);
+            var res = await _transactionRepository.CategorizeTransaction(id, command);
             return res;
         }
 
@@ -68,9 +68,9 @@ namespace PersonalFinanceManagement.API.Services
         };
         }
 
-        public async Task<CreateSplitCommand> SplitTransaction(SplitTransactionEntity entity)
+        public async Task<SplitTransactionEntity> SplitTransaction(String id, CreateSplitTransactionList splitTransaction)
         {
-            return await _transactionRepository.SplitTransaction(entity);
+            return await _transactionRepository.SplitTransaction(id, splitTransaction);
         }
 
         public async Task<TransactionEntity> UpdateEntity(TransactionEntity entity)

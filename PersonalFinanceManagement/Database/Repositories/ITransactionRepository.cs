@@ -12,8 +12,8 @@ namespace PersonalFinanceManagement.API.Database.Repositories
         Task<TransactionEntity> CreateTransaction(TransactionEntity entity);
         Task<TransactionEntity> GetTransaction(string id);
         Task<SpendingList> GetAnalytics(DateTime start, DateTime end, Direction direction, string? catCode);
-        Task<CreateSplitCommand> SplitTransaction(SplitTransactionEntity entity);
-        Task<CreateCategorizeCommand> CategorizeTransaction(string id);
+        Task<SplitTransactionEntity> SplitTransaction(String id, CreateSplitTransactionList splitTransaction);
+        Task<CreateCategorizeCommand> CategorizeTransaction(string id, CreateCategorizeCommand command);
         Task RemoveSplit(string id);
     }
 }   
