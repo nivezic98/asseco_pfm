@@ -45,15 +45,18 @@ namespace PersonalFinanceManagement.API.Database.Repositories
         public async Task<SpendingList> GetAnalytics(DateTime start, DateTime end, Direction direction, string catCode)
         {
             SpendingList spendings = new SpendingList();
-
-            var category_query = _context.Category.Where(x => x.Code == catCode).AsQueryable();
+                
+            var category_query = _context.Category.AsQueryable();
+            if(!string.IsNullOrEmpty(catCode)){
+                category_query.Where(x => x.Code == catCode);
+            }
             var categories = await category_query.ToListAsync();
             var transactions_query = _context.Transaction.Where(x => x.Date >= start && x.Date <= end && x.Direction == direction && x.Catcode == catCode).AsQueryable();
             var transactions = await transactions_query.ToListAsync();
             
             
         
-            var data = transactions.Join(categories, x => x.Id, y => y.Code, (x,y) => new { x, y}).ToList();
+            var data = transactions.Join(categories, x => x.Id, y => y.Code, (x,y) => new { x, y } ).ToList();
             int count = 0;
             double amount = 0.0;
 
