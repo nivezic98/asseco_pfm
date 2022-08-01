@@ -6,7 +6,7 @@ namespace PersonalFinanceManagement.API.Database.Repositories
 {
     public interface ITransactionRepository
     {
-        Task AutoCategorize();
+        Task AutoCategorizeTransactions();
         Task<PagedSortedList<TransactionEntity>> GetTransactions(TransactionKind? kind, DateTime start, DateTime end, int? page, int? pageSize, string? sortBy, SortOrder? sortOrder);
         Task<TransactionEntity> UpdateEntity(TransactionEntity entity);
         Task<TransactionEntity> CreateTransaction(TransactionEntity entity);

@@ -99,7 +99,7 @@ namespace PersonalFinanceManagement.API.Controllers
                 }
                 catch (Exception e)
                 {
-                    return BadRequest();
+                    return BadRequest("Data problem!");
                 }
 
             }
@@ -115,9 +115,12 @@ namespace PersonalFinanceManagement.API.Controllers
             {
                 return BadRequest("No transaction with given id!");
             }
-
+            
             var totalAmount = 0.0;
             foreach(var item in splitTransaction.Splits){
+                if(item.Amount < 0){
+                    return BadRequest("Amount is positive number!");
+                }
                 totalAmount += item.Amount;
             }
             if(totalAmount > transaction.Amount){
@@ -148,7 +151,7 @@ namespace PersonalFinanceManagement.API.Controllers
         [HttpPost("auto-categorize")] 
         public async Task<IActionResult> AutoCategorize()
     {
-         await _transactionService.AutoCategorize();
+         await _transactionService.AutoCategorizeTransactions();
          return Ok();
     }
 

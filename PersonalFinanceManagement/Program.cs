@@ -48,8 +48,6 @@ public class Program
             app.UseSwaggerUI();
         }
         
-        //app.UseRouting();
-
         app.UseAuthorization();
 
         InitializeDatabase(app);

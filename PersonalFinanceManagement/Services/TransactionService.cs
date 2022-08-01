@@ -26,8 +26,8 @@ namespace PersonalFinanceManagement.API.Services
         {
             var entity = _mapper.Map<TransactionEntity>(command);
 
-            var existingProduct = await _transactionRepository.GetTransaction(command.Id);
-            if (existingProduct != null)
+            var existing = await _transactionRepository.GetTransaction(command.Id);
+            if (existing != null)
             {
                 return null;
             }
@@ -83,9 +83,9 @@ namespace PersonalFinanceManagement.API.Services
             await _transactionRepository.RemoveSplit(id);
         }
 
-        public async Task AutoCategorize()
+        public async Task AutoCategorizeTransactions()
         {
-            await _transactionRepository.AutoCategorize();
+            await _transactionRepository.AutoCategorizeTransactions();
         }
     }
 }
