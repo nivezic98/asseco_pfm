@@ -196,7 +196,7 @@ namespace PersonalFinanceManagement.API.Database.Repositories
         {
             string[] allLines = System.IO.File.ReadAllLines("rules.txt");
             int len = Convert.ToInt32(allLines.Length);
-            int n = len/4;
+            var n = len/4;
             for (int k = 0; k < n; k++)
             {
                 string catCode = allLines[k * 4 + 2].Split(":")[1];
